@@ -1,0 +1,41 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+
+@import 'tailwindcss/utilities';
+
+.release-title {
+	max-width: 450px;
+}
+
+.variant-group:hover .download {
+	opacity: 1;
+}
+
+.torrent-wrapper .bg-cover {
+	filter: blur(50px);
+	z-index: -1;
+	will-change: opacity;
+}
+
+.torrent-wrapper .torrent-image {
+	width: 182px;
+	/* max-height: 268px; */
+}
+
+.torrent-wrapper .torrent:hover + .bg-cover {
+	opacity: .35;
+}
+
+.layout {
+	grid-template-rows: min-content;
+}
+nav a {
+	@apply text-gray-500;
+}
+nav a, nav a:hover {
+	@apply duration-200;
+}
+nav a:hover {
+	@apply text-gray-300;
+}
