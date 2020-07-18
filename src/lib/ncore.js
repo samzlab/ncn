@@ -1,7 +1,6 @@
-import { objectToUri, parseHTML } from "./utils";
+import { objectToUri, parseHTML, isUserScript, wait } from "./utils";
 
 const
-	isUserScript = typeof GM_info != 'undefined',
 	// urls
 	BASE_URL = isUserScript ? '/torrents.php?' : '/mock/torrent-list-$oldal.html?',
 	PROFILE_URL = isUserScript ? 'profile.php?action=other' : '/mock/profile.html',

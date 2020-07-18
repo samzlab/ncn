@@ -1,10 +1,10 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import { isUserScript } from './lib/utils';
 
 const
 	doc = document,
-	body = doc.querySelector('body'),
-	isUserScript = typeof GM_info != 'undefined';
+	body = doc.querySelector('body');
 
 function start() {
 	body.innerHTML = '';

@@ -1,3 +1,5 @@
+export const isUserScript = typeof GM_info != 'undefined';
+
 function encodePair(...pair) {
 	return pair.map(encodeURIComponent).join('=');
 }
