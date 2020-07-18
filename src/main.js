@@ -1,13 +1,16 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 
-const doc = document, body = doc.querySelector('body');
+const
+	doc = document,
+	body = doc.querySelector('body'),
+	isUserScript = typeof GM_info != 'undefined';
 
 function start() {
 	body.innerHTML = '';
 	body.setAttribute('class', 'h-full p-4 bg-gray-900');
 
-	if (GM_info) { // UserScript-ben futunk :)
+	if (isUserScript) { // UserScript-ben futunk :)
 
 		// takaritsunk
 		for (let link of doc.styleSheets) {
@@ -29,8 +32,9 @@ function start() {
 	createApp(App).mount(body);
 }
 
-// csak ha mar beleptunk
-if (location.pathname !== '/login.php') {
+if (!isUserScript) { // csak dev mode-ban
+	start()
+} else if (location.pathname !== '/login.php') { // csak ha mar beleptunk
 	// csinaljunk egy 'nCore next' "gombot"
 	const span = document.createElement('span');
 	span.classList.add('list_alert');

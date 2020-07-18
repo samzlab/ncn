@@ -1,8 +1,10 @@
 import { objectToUri, parseHTML } from "./utils";
 
 const
-	BASE_URL = 'https://ncore.cc/torrents.php?',
-	// BASE_URL = '/mock/torrent-list-$oldal.html?',
+	isUserScript = typeof GM_info != 'undefined',
+	// urls
+	BASE_URL = isUserScript ? '/torrents.php?' : '/mock/torrent-list-$oldal.html?',
+	PROFILE_URL = isUserScript ? 'profile.php?action=other' : '/mock/profile.html',
 	// parser helpers
 	sources = [ 'bdremux', 'bdrip', 'blue?ray', 'dvdrip', 'bd50', 'dvd9', 'web-dl', 'LDRip' ].join('|'),
 	sourceRegexp = new RegExp('\.('+sources+')\.', 'i');
@@ -137,7 +139,7 @@ async function fetchHTML(url) {
 }
 
 export async function fetchPassKey() {
-	const body = parseHTML(await fetchHTML('/profile.php?action=other'));
+	const body = parseHTML(await fetchHTML(PROFILE_URL));
 	try {
 		return [...body.querySelectorAll('#profil_right li')].find(li => li.textContent.match(/Passkey/)).children[0].textContent;
 	} catch (err) {
