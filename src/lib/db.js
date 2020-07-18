@@ -23,7 +23,7 @@ export function indexByImdb(torrents, index = {}, limit = 0) {
 
 		if ( doc.imdb in index ) {
 
-			if (index[doc.imdb].torrents.find(torrent => torrent.id === doc.id)){
+			if (index[doc.imdb].releases.find(torrent => torrent.id === doc.id)){
 				continue;
 			}
 
@@ -39,9 +39,9 @@ export function indexByImdb(torrents, index = {}, limit = 0) {
 				index[doc.imdb].resolutions.push(doc.resolution);
 			}
 
-			index[doc.imdb].torrents.push(doc);
+			index[doc.imdb].releases.push(doc);
 		} else {
-			index[doc.imdb] = { ...doc, firstRelease: new Date(doc.date * 1000), torrents: [ doc ], langs: [ doc.lang ], resolutions: [ doc.resolution ] };
+			index[doc.imdb] = { ...doc, firstRelease: new Date(doc.date * 1000), releases: [ doc ], langs: [ doc.lang ], resolutions: [ doc.resolution ] };
 
 			if (limit && ++unique >= limit) {
 				break;

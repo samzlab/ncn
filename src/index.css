@@ -5,10 +5,18 @@
 @import 'tailwindcss/utilities';
 
 .release-title {
-	max-width: 450px;
+	max-width: 28rem;
 }
 
-.variant-group:hover .download {
+.release-button {
+	opacity: 0;
+}
+
+.variant-group:hover .release-button {
+	opacity: .5;
+}
+
+.variant-group:hover .release-button:hover {
 	opacity: 1;
 }
 
