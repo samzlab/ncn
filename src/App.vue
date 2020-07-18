@@ -6,14 +6,21 @@
         <Header v-model:tab="tab" />
 
         <main class="col-span-7">
-            <component :is="pages[tab]" />
+            <Suspense>
+                <template #default>
+                    <component :is="pages[tab]" />
+                </template>
+                <template #fallback>
+                    ...
+                </template>
+            </Suspense>
         </main>
     </div>
 </template>
-
 <script>
-
     import { ref, computed, provide } from 'vue';
+
+    import { fetchPassKey } from 'lib/ncore';
 
     // comps
     import Header from 'components/Header.vue';
@@ -27,10 +34,18 @@
             Header
         },
         setup() {
-            const loading = ref(null);
-            const tab = ref('movies');
+            const loading 	= ref('loading');
+            const tab 		= ref('movies');
+            const passKey 	= ref(null);
 
             provide('loading', loading);
+            provide('passKey', passKey);
+
+            // load passKey from profile
+            fetchPassKey().then(value => {
+                loading.value = null;
+                passKey.value = value;
+            });
 
             return {
                 // template vars

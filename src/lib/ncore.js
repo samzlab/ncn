@@ -104,7 +104,7 @@ function getTorrentsFromBody(body){
 
 			result.uploaded = result.uploaded.slice(0,10) + ' ' + result.uploaded.slice(10);
 			result.date = Date.parse(result.uploaded) / 1000;
-			result.lang = _type[1];
+			result.lang = _type[1] === 'HU' ? 'hun' : 'eng';
 
 			infos.forEach(([ key, parser ]) => result[key] = parser.test(result.name));
 
@@ -158,6 +158,7 @@ export async function fetchPassKey() {
 }
 
 export async function fetchTorrents(query) {
+	// console.log(query);
 	let base = BASE_URL.replace('$oldal', query.oldal || 1); // temp dev hekk
 	return getTorrentsFromBody(
 		parseHTML(

@@ -1,3 +1,6 @@
+import { fetchByTitle, searchTypes } from 'lib/ncore';
+import { unique, intersect, intersects } from 'lib/utils';
+
 export function loadFromStorage(item) {
 	const result = localStorage.getItem(item);
 	return result && JSON.parse(result);
@@ -13,39 +16,61 @@ export function find(collection, where) {
 	}, collection);
 }
 
-export function indexByImdb(torrents, index = {}, limit = 0) {
-	let unique = 0;
+export function findById(collection, id) {
+	return collection.find( doc => doc.id === id );
+}
 
+export function findByIds(collection, ids) {
+	return collection.filter( doc => ids.includes(doc.id) );
+}
+
+export function findByLangs(collection, langs) {
+	return collection.filter(doc => intersects(doc.langs, langs));
+}
+
+export function findByResolutions(collection, resolutions) {
+	return collection.filter(doc => intersects(doc.resolutions, resolutions));
+}
+
+export function indexByImdb(torrents, index = {}) {
 	for (let i = 0, len = torrents.length; i < len; i++) {
-		const doc = torrents[i];
+		const { id, title, imdb, rating, year, date, lang, resolution, cover } = torrents[i];
 
-		if ( !doc.imdb ) continue;
+		if ( !imdb ) continue;
 
-		if ( doc.imdb in index ) {
+		if ( imdb in index ) {
 
-			if (index[doc.imdb].releases.find(torrent => torrent.id === doc.id)){
+			const item = index[imdb];
+
+			if (item.releases.includes(id)){
 				continue;
 			}
 
-			if( index[doc.imdb].firstRelease > doc.date ) {
-				index[doc.imdb].firstRelease = new Date(doc.date * 1000);
+			if (item.firstRelease > date) {
+				item.firstRelease = date;
 			}
 
-			if (!index[doc.imdb].langs.includes(doc.lang)) {
-				index[doc.imdb].langs.push(doc.lang);
+			if (!item.langs.includes(lang)) {
+				item.langs.push(lang);
 			}
 
-			if (!index[doc.imdb].resolutions.includes(doc.resolution)) {
-				index[doc.imdb].resolutions.push(doc.resolution);
+			if (!item.resolutions.includes(resolution)) {
+				item.resolutions.push(resolution);
 			}
 
-			index[doc.imdb].releases.push(doc);
+			item.releases.push(id);
 		} else {
-			index[doc.imdb] = { ...doc, firstRelease: new Date(doc.date * 1000), releases: [ doc ], langs: [ doc.lang ], resolutions: [ doc.resolution ] };
-
-			if (limit && ++unique >= limit) {
-				break;
-			}
+			index[imdb] = {
+				title,
+				imdb,
+				rating,
+				year,
+				cover,
+				firstRelease: date,
+				releases: [ id ],
+				langs: [ lang ],
+				resolutions: [ resolution ]
+			};
 		}
 	}
 

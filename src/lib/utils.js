@@ -1,5 +1,6 @@
 export const isUserScript = typeof GM_info != 'undefined';
 
+// URL utils
 function encodePair(...pair) {
 	return pair.map(encodeURIComponent).join('=');
 }
@@ -24,7 +25,6 @@ export function objectToUri(object = {}) {
 	return entries.join('&');
 }
 
-
 export function uriToObject(uri = '') {
 	const result = {};
 
@@ -35,17 +35,18 @@ export function uriToObject(uri = '') {
 	return result;
 }
 
+// DOM utils
 export function parseHTML(html){
 	var doc = document.implementation.createHTMLDocument("temp");
 	doc.documentElement.innerHTML = html;
 	return doc.body;
 }
 
+// date utils
 const 	MINUTE = 60, HOUR = 60 * MINUTE, DAY = 24 * HOUR, WEEK = 7 * DAY, MONTH = 30 * DAY, YEAR = 365 * DAY;
-
 export function toRelativeDate(date){
 	const
-		torrDate = date instanceof Date ? date : Date.parse(date.replace(' ', 'T') + 'Z'),
+		torrDate = date instanceof Date ? date : new Date(date * 1000), // Date.parse(date.replace(' ', 'T') + 'Z'),
 		elapsed = parseInt(( Date.now() - torrDate ) / 1000, 10) + HOUR;
 
 	let unit = '', div = 1;
@@ -75,6 +76,7 @@ export function toRelativeDate(date){
 	return `${Math.round( elapsed / div )} ${unit}`;
 }
 
+// array utils
 export function intersect(a, b) {
   let ai = 0, bi = 0, result = [];
 
@@ -96,6 +98,11 @@ export function intersects(a, b) {
 	return a.find(item => b.includes(item)) !== undefined;
 }
 
+export function unique(arr) {
+	return arr.filter((value, index, self) => self.indexOf(value) === index);
+}
+
+// throttle for async functions
 export function wait(msecs) {
 	return new Promise(resolve => setTimeout(resolve, msecs));
 }
