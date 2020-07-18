@@ -94,6 +94,6 @@ export function intersects(a, b) {
 	return a.find(item => b.includes(item)) !== undefined;
 }
 
-export function wait(secs) {
-	return new Promise(resolve => setTimeout(resolve, secs*1000));
+export function wait(msecs) {
+	return new Promise(resolve => setTimeout(resolve, msecs));
 }

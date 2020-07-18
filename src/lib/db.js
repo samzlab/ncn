@@ -1,9 +1,10 @@
-export function loadFromStorage() {
-	return JSON.parse(localStorage.getItem('torrents') || '[]');
+export function loadFromStorage(item) {
+	const result = localStorage.getItem(item);
+	return result && JSON.parse(result);
 }
 
-export function saveToStorage(torrents) {
-	localStorage.setItem('torrents', JSON.stringify(torrents));
+export function saveToStorage(item, data) {
+	localStorage.setItem(item, JSON.stringify(data));
 }
 
 export function find(collection, where) {

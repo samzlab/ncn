@@ -133,7 +133,13 @@ function getTorrentsFromBody(body){
 	return torrents;
 }
 
+let lastFetch = 0, throttle = 1000;
 async function fetchHTML(url) {
+	let now = Date.now(), elapsed = now - lastFetch;
+	if (elapsed < throttle) {
+		await wait(throttle - elapsed);
+	}
+	lastFetch = now;
 	const response = await fetch(url);
 	return response.text();
 }

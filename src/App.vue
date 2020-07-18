@@ -89,7 +89,6 @@
 
             const index = {};
             const allTorrents = reactive([]);
-            const pages = ref(0);
             const limit = ref(20);
             const sort = ref('byFirstRelease');
             const passKey = ref(null);
@@ -107,7 +106,7 @@
                 loading.value = false;
             }
 
-            const storedTorrents = loadFromStorage();
+            const storedTorrents = loadFromStorage('torrents') || [];
 
             (async()=>{
 
@@ -117,7 +116,7 @@
                 if (storedTorrents.length > 10000) {
                     // cleanup
                     storedTorrents.splice(0, 100);
-                    saveToStorage(storedTorrents);
+                    saveToStorage('torrents', storedTorrents);
                 }
 
                 if (!storedTorrents.length) { // first run, load the first 200 torrent
@@ -127,14 +126,13 @@
                     for (let i = 1; i <= 4; i++) {
                         temp.push(...await fetchByTitle(null, [searchTypes.movies.hd_hu], null, i));
                         loading.value = `${i} / 4 oldal beolvasva`;
-                        await wait(1);
                     }
 
                     loaded(temp);
-                    saveToStorage(temp);
-
+                    saveToStorage('torrents', temp);
                 } else {
                     loaded(storedTorrents);
+                    storedTorrents.length = 0;
                 }
 
             })();
@@ -187,17 +185,19 @@
             }
 
             return {
+                // template vars
                 loading,
                 sort,
                 torrents,
-                pages,
                 passKey,
-                toRelativeDate,
-                types,
                 filters,
+                // static
+                types,
+                // helpers
+                toRelativeDate,
+                filterReleases,
                 // methods
-                toggleFilter,
-                filterReleases
+                toggleFilter
             }
         }
     }
