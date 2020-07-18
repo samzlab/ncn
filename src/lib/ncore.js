@@ -9,26 +9,28 @@ const
 	sourceRegexp = new RegExp('\.('+sources+')\.', 'i');
 
 function getResolution(title){
-	var match = title.toLowerCase().match(/(720|1080|2160)(p|i)/);
+	let match = title.toLowerCase().match(/(720|1080|2160)(p|i)/);
 	return (match && match.length > 1) ? match[1] : 'other';
 }
+
 function getSource(title){
-	var match = title.match(sourceRegexp);
-	return (match && match.length > 1) ? match[1] : 'Unknown';
+	let match = title.match(sourceRegexp);
+	return (match && match.length > 1) ? match[1] : null;
 }
+
 function getValidYear(title){
 	let year = title.match(/\.((19|20)\d{2})\./);
 	year = year && Number(year[1]);
 	return (year > 1950 && year <= new Date().getFullYear()) ? year : false;
 }
+
 function getReleaser(title){
-	var match = title.match(/\-([^\- ]+)$/);
+	let match = title.match(/\-([^\- ]+)$/);
 	return (match && match.length > 1) ? match[1] : false;
 }
 
 const infos = Object.entries({
 	'resolution': { test: getResolution },
-	//'hun':       /\.hun(garian)?[.-]/i,
 	'source':    { test: getSource },
 	'year':      { test: getValidYear },
 	'releaser':  { test: getReleaser }
@@ -104,7 +106,6 @@ function getTorrentsFromBody(body){
 			result.date = Date.parse(result.uploaded) / 1000;
 			result.lang = _type[1];
 
-			// infos.forEach((info) => console.log(info));
 			infos.forEach(([ key, parser ]) => result[key] = parser.test(result.name));
 
 			if (!result.title) {
