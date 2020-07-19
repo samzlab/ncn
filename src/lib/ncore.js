@@ -1,9 +1,7 @@
-import { objectToUri, parseHTML, isUserScript, wait } from "./utils";
+import { objectToUri, parseHTML, isUserScript, wait } from './utils';
+import { BASE_URL, PROFILE_URL, XHR_THROTTLE } from './config'
 
 const
-	// urls
-	BASE_URL = isUserScript ? '/torrents.php?' : '/mock/torrent-list-$oldal.html?',
-	PROFILE_URL = isUserScript ? 'profile.php?action=other' : '/mock/profile.html',
 	// parser helpers
 	sources = [ 'bdremux', 'bdrip', 'blue?ray', 'dvdrip', 'bd50', 'dvd9', 'web-dl', 'LDRip' ].join('|'),
 	sourceRegexp = new RegExp('\.('+sources+')\.', 'i');
@@ -11,6 +9,11 @@ const
 function getResolution(title){
 	let match = title.toLowerCase().match(/(720|1080|2160)(p|i)/);
 	return (match && match.length > 1) ? match[1] : 'other';
+}
+
+function getFullResolution(title){
+	let match = title.toLowerCase().match(/(720|1080|2160)(p|i)/);
+	return (match && match.length > 1) ? match[0] : false;
 }
 
 function getSource(title){
@@ -31,6 +34,7 @@ function getReleaser(title){
 
 const infos = Object.entries({
 	'resolution': { test: getResolution },
+	'fullResolution': { test: getFullResolution },
 	'source':    { test: getSource },
 	'year':      { test: getValidYear },
 	'releaser':  { test: getReleaser }
@@ -65,6 +69,10 @@ const SEASON_AND_EPISODE = /S(\d+)(E(\d+))?/, EPISODE = /((E))(\d+)/;
 function getSeasonAndEpisode(title) {
 	const [id, season,,episode] = title.match(SEASON_AND_EPISODE) || title.match(EPISODE) || [false];
 	return [id, Number(season), Number(episode)];
+}
+
+function getPage(a) {
+	return a.getAttribute('href').match(/oldal=(\d+)/)[1] || 0;
 }
 
 function getTorrentsFromBody(body){
@@ -128,22 +136,50 @@ function getTorrentsFromBody(body){
 		}
 	}
 
-	// const pages = torrents.length ? body.querySelector('#pager_top a[href^="/torrents.php"]').getAttribute('href').match(/oldal=(\d+)/)[1] : 0;
+	let pages = 0;
 
-	return torrents;
-}
+	const $lastPageLink = [...body.querySelectorAll('#pager_top a[href^="/torrents.php"]')].pop();
 
-let lastFetch = 0;
-async function fetchHTML(url, throttle = 1000) {
-	const elapsed = Date.now() - lastFetch;
-
-	if (elapsed < throttle) {
-		// ne spameljuk szet requestekkel az ncore-t ha lehet
-		await wait(throttle - elapsed);
+	if ($lastPageLink) {
+		pages = $lastPageLink.getAttribute('href').match(/oldal=(\d+)/)[1];
+		if ($lastPageLink.textContent !== 'Utolsó') { // ha az utso oldalon vagyunk, azaz az utolso link nem oda mutat
+			pages++;
+		}
 	}
 
-	lastFetch = Date.now();
-	return (await fetch(url)).text();
+	return { pages, torrents };
+}
+
+const queue = [];
+let queued = 0;
+export function enQueue(fn) {
+	const promise = new Promise((resolve) => {
+		queue.push([fn, resolve]);
+	});
+
+	if (queue.length === 1) {
+		runQueue();
+	}
+
+	return promise;
+}
+
+async function runQueue() {
+	if (queue.length) {
+		await wait(XHR_THROTTLE);
+		const [fn, cb] = queue.shift();
+		cb(fn());
+		queued = queue.length;
+		if (queue.length) {
+			runQueue();
+		}
+	}
+}
+
+async function fetchHTML(url) {
+	return enQueue(async() => {
+		return (await fetch(url)).text();
+	});
 }
 
 export async function fetchPassKey() {
@@ -158,7 +194,6 @@ export async function fetchPassKey() {
 }
 
 export async function fetchTorrents(query) {
-	// console.log(query);
 	let base = BASE_URL.replace('$oldal', query.oldal || 1); // temp dev hekk
 	return getTorrentsFromBody(
 		parseHTML(
@@ -169,7 +204,7 @@ export async function fetchTorrents(query) {
 
 export async function fetchByTitle(title, types, tags, oldal) {
 	return fetchTorrents({
-		'kivalasztott_tipus[]': types,
+		'kivalasztott_tipus': types,
 		'mire': title,
 		'miben': 'name',
 		'tipus': 'kivalasztottak_kozott',
@@ -180,7 +215,7 @@ export async function fetchByTitle(title, types, tags, oldal) {
 
 export async function fetchByIMDB(imdbId, types, oldal) {
 	return fetchTorrents({
-		'kivalasztott_tipus[]': types,
+		'kivalasztott_tipus': types,
 		'mire': imdbId,
 		'miben': 'imdb',
 		'tipus': 'kivalasztottak_kozott',

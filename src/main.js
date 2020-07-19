@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
-import App from './App.vue'
 import { isUserScript } from './lib/utils';
+import { VERSION } from 'lib/config';
+
+import App from './App.vue'
 
 const
 	doc = document,
@@ -24,7 +26,7 @@ function start() {
 		// mutassuk meg hogy nez ki egy rendes design
 		const cssLink = document.createElement('link');
 		cssLink.setAttribute('rel', 'stylesheet');
-		cssLink.href = 'https://samzlab.hu/ncn/style.css';
+		cssLink.href = `https://samzlab.hu/ncn/style.css?${VERSION}`;
 
 		doc.head.appendChild(cssLink)
 	}

@@ -1,18 +1,21 @@
 import { ref, reactive, watch, computed, toRaw } from 'vue';
 import { loadFromStorage, indexByImdb, findById, findByIds, saveToStorage } from 'lib/db';
 import { unique, intersects } from 'lib/utils';
-import { fetchByTitle } from 'lib/ncore';
-
-const MOVIE_PER_PAGE = 40;
-
-function getId(doc) {
-	return doc.id;
-}
+import { fetchByTitle, fetchByIMDB, searchTypes, enQueue } from 'lib/ncore';
+import { DB_VERSION, MOVIE_PER_PAGE, PAGE_PER_IMDB_SCAN } from 'lib/config';
 
 // init
+const settings = loadFromStorage('ncn-settings') || {};
+if ( settings.dbVersion !== DB_VERSION) {
+	saveToStorage('torrents', []); // db reset
+
+	settings.dbVersion = DB_VERSION; // atallitjuk az aktualis verziot
+	saveToStorage('ncn-settings', settings);
+}
+
 const allTorrents = loadFromStorage('torrents') || [];
 const imdbIndex = reactive(indexByImdb(allTorrents));
-const idIndex = new Set(allTorrents.map(getId));
+const idIndex = new Set(allTorrents.map(doc => doc.id));
 
 const typesMap = {
 	'720': 'hd',
@@ -30,10 +33,41 @@ const sorters = {
 	byRating: (doc1, doc2) => doc2.rating - doc1.rating
 };
 
+async function loadAllByImdb(index) {
+	index.fresh = false;
+
+	// return;
+	const types = Object.values(searchTypes[index.isSeries ? 'series' : 'movies']).join(',');
+
+	for( let i = 1; i <= PAGE_PER_IMDB_SCAN; i++ ) {
+		const { torrents: result, pages } = await fetchByIMDB(index.imdb, types, i);
+		// console.log('adding torrents by imdb ', index.imdb, `${i} / ${pages}`);
+		addTorrents(result);
+
+		if (i >= pages) {
+			break;
+		}
+	}
+
+	saveToStorage('torrents', allTorrents);
+}
+
+async function refreshIndex(index, forced = false) {
+	if ((index.fresh && !index.refreshing) || forced) {
+		// progress.value = `${index.imdb} frissítése...`;
+		// console.log(index.imdb, index);
+		index.refreshing = true;
+		await loadAllByImdb(index);
+		index.refreshing = false;
+		// progress.value = '';
+	}
+}
+
 function addTorrents(torrents) {
 	const results = torrents.filter(doc => !idIndex.has(doc.id));
 
-	indexByImdb(results, imdbIndex);
+	indexByImdb(results, imdbIndex, (index) => index.fresh = true);
+
 	results.forEach( ({ id }) => idIndex.add(id) );
 
 	allTorrents.push(...results);
@@ -43,19 +77,16 @@ function addTorrents(torrents) {
 
 let dbInstance = null;
 function DB() {
-	// filters
-	// const filters = reactive({
-	// 	resolutions: [],
-	// 	langs: []
-	// });
 	const resolutions = reactive(['1080']);
 	const langs = reactive(['hun']);
 	const tags = reactive([]);
 	const text = ref('');
-	const category = ref(null);
+	const category = ref(null); // movies vagy series
 
-	const limit = ref(20);
+	const limit = ref(MOVIE_PER_PAGE);
 	const sort = ref('byFirstRelease');
+
+	const progress = ref(false);
 
 	const currentResults = reactive([]);
 
@@ -88,15 +119,10 @@ function DB() {
 	const results = computed(() => {
 		let found = 0;
 
-		const filtered = currentResults.map(imdbId => imdbIndex[imdbId]).filter(doc => {
+		const filtered = currentResults.map(imdbId => imdbIndex[imdbId]).sort(sorters[sort.value]).filter(doc => {
 			if (found >= limit.value) {
 				return false;
 			}
-
-			// if (!doc) {
-			// 	console.log(doc);
-			// 	return false;
-			// }
 
 			if (langs.length && !intersects(doc.langs, langs)){
 				return false;
@@ -111,8 +137,6 @@ function DB() {
 			return true;
 		});
 
-		filtered.sort(sorters[sort.value]);
-
 		return filtered;
 	});
 
@@ -122,8 +146,9 @@ function DB() {
 
 		let searchId = ++currentSearch;
 
-		for( let i = 1; i < 8; i++ ) {
-			const result = await fetchByTitle(text.value, types.value.split(','), toRaw(tags), i);
+		for( let i = 1; i <= 8; i++ ) { // max 8 oldal scannelése
+			progress.value = `${i}. oldal scannelése`;
+			const { torrents: result, pages } = await fetchByTitle(text.value, types.value, tags.join(','), i);
 			addTorrents(result);
 
 			if (currentSearch != searchId) {
@@ -135,16 +160,29 @@ function DB() {
 			});
 
 
-			if (currentResults.length >= MOVIE_PER_PAGE) {
-				currentResults.splice(MOVIE_PER_PAGE);
+			if (i >= pages ) { // || results.value.length >= MOVIE_PER_PAGE
+				// currentResults.splice(MOVIE_PER_PAGE);
 				break;
 			}
 		}
+
+		progress.value = ''; // `${results.value.length} találat`;
 
 		saveToStorage('torrents', allTorrents);
 
 		return currentResults;
 	}
+
+	watch(results, () => {
+		enQueue(async() => {
+			progress.value = 'aktualizálás...';
+			console.log('checking results to update index...');
+			for (let i = 0, len = results.value.length; i < len; i++) {
+				await refreshIndex(results.value[i]);
+			}
+			progress.value = '';
+		});
+	});
 
 	let lastTypes = null;
 	watch([ text, types, tags ], () => {
@@ -163,7 +201,10 @@ function DB() {
 		limit,
 		text,
 		category,
-		findByIds: (ids) => findByIds(allTorrents, ids)
+		progress,
+		findByIds: (ids) => findByIds(allTorrents, ids),
+		refreshIndex,
+		search
 	};
 }
 

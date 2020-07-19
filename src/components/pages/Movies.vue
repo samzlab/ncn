@@ -21,20 +21,30 @@
         <FilterButton :is-active="sort === 'byRating'" @click="sort = 'byRating'">
             IMDB szerint
         </FilterButton>
+
+        <div class="ml-auto">
+            {{ progress }}
+        </div>
     </div>
 
     <!-- RESULT GRID -->
     <div class="grid hd:grid-cols-2 uhd:grid-cols-3 gap-8">
         <Torrent v-for="movie in results" :key="movie.imdb" :torrent="movie">
             <template #default="{ releases }">
-                <Release v-for="release in getReleaseTorrents(releases)" :key="release.id" :release="release" :pass-key="passKey" @bookmark="bookmark" />
+                <Release v-for="release in getReleaseTorrents(releases)" :key="release.id"
+                         :release="release"
+                         :pass-key="passKey"
+                         :resolution="resolutions.length !== 1"
+                         :lang="langs.length !== 1"
+                         @bookmark="bookmark"
+                />
             </template>
         </Torrent>
     </div>
 </template>
 
 <script>
-    import { onMounted, reactive, ref, computed, inject, watchEffect } from 'vue';
+    import { onMounted, reactive, ref, computed, inject, watchEffect, provide } from 'vue';
 
     import { intersects, wait, isUserScript } from 'lib/utils';
 
@@ -61,7 +71,9 @@
             const loading = inject('loading');
             const passKey = inject('passKey');
 
-            const { langs, resolutions, category, results, sort, findByIds } = useDB('movies', ['hun'], ['1080'], []);
+            const { langs, resolutions, category, results, sort, progress, findByIds, refreshIndex } = useDB('movies', ['hun'], ['1080'], []);
+
+            provide('refreshIndex', refreshIndex);
 
             function bookmark(release) {
                 console.log(release);
@@ -69,7 +81,7 @@
 
             function getReleaseTorrents(idList) {
                 const result = findByIds(idList);
-                return result.filter(filterReleases);
+                return result.filter(filterReleases).sort((a, b) => b.seeds - a.seeds);
             }
 
             function filterReleases(release) {
@@ -100,13 +112,12 @@
                 sort,
                 results,
                 passKey,
+                progress,
                 // filters,
                 langs,
                 resolutions,
                 // static
                 typeFilters,
-                // helpers
-                // filterReleases,
                 // methods
                 bookmark,
                 toggleFilter,

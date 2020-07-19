@@ -15,7 +15,7 @@ export function objectToUri(object = {}) {
 
 		if (entry[1] instanceof Array) {
 			for (let item of entry[1]) {
-				entries.push(encodePair(entry[0], item));
+				entries.push(encodePair(`${entry[0]}[]`, item));
 			}
 		} else {
 			entries.push(encodePair(...entry));
@@ -52,7 +52,7 @@ export function toRelativeDate(date){
 	let unit = '', div = 1;
 
 	if( elapsed > YEAR ){
-		div = year;
+		div = YEAR;
 		unit = 'éve';
 	} else if( elapsed > MONTH ){
 		div = MONTH;

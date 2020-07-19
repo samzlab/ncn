@@ -32,7 +32,7 @@ export function findByResolutions(collection, resolutions) {
 	return collection.filter(doc => intersects(doc.resolutions, resolutions));
 }
 
-export function indexByImdb(torrents, index = {}) {
+export function indexByImdb(torrents, index = {}, onCreate) {
 	for (let i = 0, len = torrents.length; i < len; i++) {
 		const { id, title, imdb, rating, year, date, lang, resolution, cover } = torrents[i];
 
@@ -61,6 +61,7 @@ export function indexByImdb(torrents, index = {}) {
 			item.releases.push(id);
 		} else {
 			index[imdb] = {
+				refreshing: false,
 				title,
 				imdb,
 				rating,
@@ -71,6 +72,8 @@ export function indexByImdb(torrents, index = {}) {
 				langs: [ lang ],
 				resolutions: [ resolution ]
 			};
+
+			onCreate && onCreate(index[imdb]);
 		}
 	}
 
