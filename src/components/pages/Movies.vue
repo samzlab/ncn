@@ -6,12 +6,12 @@
             {{ lang }}
         </FilterButton>
 
-        <span class="ml-8 text-gray-500">Típusok:</span>
+        <span class="ml-8 inline-block text-gray-500">Típusok:</span>
         <FilterButton v-for="(typeName, type) in typeFilters" :key="type" :is-active="resolutions.includes(type)" @click="toggleFilter(resolutions, type)">
             {{ typeName }}
         </FilterButton>
 
-        <span class="ml-8 text-gray-500">Rendezés:</span>
+        <span class="ml-8 inline-block text-gray-500">Rendezés:</span>
         <FilterButton :is-active="sort === 'byFirstRelease'" @click="sort = 'byFirstRelease'">
             Újdonságok
         </FilterButton>
@@ -22,13 +22,18 @@
             IMDB szerint
         </FilterButton>
 
+        <span class="ml-8 inline-block text-gray-500">Keresés:</span>
+        <form @submit.prevent="search">
+            <input v-model="searchText" class="ml-4 px-2 bg-gray-700 text-gray-100 rounded outline-none font-sans">
+        </form>
+
         <div class="ml-auto">
             {{ progress }}
         </div>
     </div>
 
     <!-- RESULT GRID -->
-    <div class="grid hd:grid-cols-2 uhd:grid-cols-3 gap-8">
+    <div class="grid hd:grid-cols-2 gap-8">
         <Torrent v-for="movie in results" :key="movie.imdb" :torrent="movie">
             <template #default="{ releases }">
                 <Release v-for="release in getReleaseTorrents(releases)" :key="release.id"
@@ -71,7 +76,14 @@
             const loading = inject('loading');
             const passKey = inject('passKey');
 
-            const { langs, resolutions, category, results, sort, progress, findByIds, refreshIndex } = useDB('movies', ['hun'], ['1080'], []);
+            const searchText = ref('');
+
+            const { langs, resolutions, category, results, sort, progress, findByIds, refreshIndex, text } = useDB('movies', ['hun'], ['1080', '2160'], []);
+
+            function search() {
+                text.value = searchText.value;
+                console.log('kereses', searchText.value);
+            }
 
             provide('refreshIndex', refreshIndex);
 
@@ -113,12 +125,14 @@
                 results,
                 passKey,
                 progress,
+                searchText,
                 // filters,
                 langs,
                 resolutions,
                 // static
                 typeFilters,
                 // methods
+                search,
                 bookmark,
                 toggleFilter,
                 getReleaseTorrents

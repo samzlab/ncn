@@ -1,7 +1,7 @@
 <template>
     <div class="relative torrent-wrapper">
-        <div class="bg-gray-900 bg-opacity-50 z-10 p-4 shadow-lg flex torrent">
-            <div class="flex-shrink-0 torrent-image self-center">
+        <div class="h-full bg-gray-900 bg-opacity-50 z-10 p-4 shadow-lg flex torrent">
+            <div class="flex-shrink-0 torrent-image">
                 <img class="w-100" :src="getCover(torrent)">
             </div>
             <div class="flex-auto px-4">

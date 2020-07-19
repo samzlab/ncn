@@ -115,11 +115,36 @@ function DB() {
 		return result.join(',');
 	});
 
+	function filterReleases(release) {
+		if (langs.length && !langs.includes(release.lang)) {
+			return false;
+		}
+
+		if (resolutions.length && !resolutions.includes(release.resolution)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function getFirstRelease(releases) {
+		return releases.reduce((result, release) => (result && (release.date > result)) ? result : release.date, 0);
+	}
+
+	function getFilteredReleases(index) {
+		return index.releases.map( id => allTorrents.find( doc => doc.id === id )).filter(filterReleases);
+	}
+
+	function sortByFirstRelease(a, b) {
+		return getFirstRelease(getFilteredReleases(b)) - getFirstRelease(getFilteredReleases(a));
+	}
 
 	const results = computed(() => {
 		let found = 0;
 
-		const filtered = currentResults.map(imdbId => imdbIndex[imdbId]).sort(sorters[sort.value]).filter(doc => {
+		const sortFn = sort.value === 'byFirstRelease' ? sortByFirstRelease : sorters[sort.value];
+
+		const filtered = currentResults.map(imdbId => imdbIndex[imdbId]).sort(sortFn).filter(doc => {
 			if (found >= limit.value) {
 				return false;
 			}
@@ -184,10 +209,11 @@ function DB() {
 		});
 	});
 
-	let lastTypes = null;
+	let lastTypes = null, lastText = '';
 	watch([ text, types, tags ], () => {
-		if (category.value && types.value !== lastTypes) {
-			// console.log('types', types.value, lastTypes);
+		// the 'types' computed triggers change even if the final result is the same...
+		if (category.value && (types.value !== lastTypes || text.value !== lastText)) {
+			lastText = text.value;
 			lastTypes = types.value;
 			search(text, types, tags);
 		}

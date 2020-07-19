@@ -1,6 +1,6 @@
 import { isUserScript } from "./utils";
 
-export const VERSION = '0.1.14';
+export const VERSION = '0.1.16';
 
 export const SCRIPT_LINK = 'https://samzlab.hu/ncn/ncore-next.user.js';
 
