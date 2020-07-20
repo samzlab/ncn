@@ -72,7 +72,7 @@
             Release,
             FilterButton
         },
-        async setup() {
+        setup() {
             const loading = inject('loading');
             const passKey = inject('passKey');
 

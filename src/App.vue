@@ -6,14 +6,7 @@
         <Header v-model:tab="tab" />
 
         <main class="col-span-7">
-            <Suspense>
-                <template #default>
-                    <component :is="pages[tab]" />
-                </template>
-                <template #fallback>
-                    ...
-                </template>
-            </Suspense>
+            <component :is="pages[tab]" />
         </main>
     </div>
 </template>
@@ -27,6 +20,7 @@
 
     // pages
     import * as pages from 'components/pages';
+    // import Movies from 'components/pages/Movies.vue';
 
     export default {
         name: 'App',
