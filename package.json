@@ -7,18 +7,17 @@
   },
   "issues": "https://github.com/samzlab/ncn/issues",
   "dependencies": {
-    "vue": "^3.0.0-rc.2"
+    "vue": "3.0.0-rc.2"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.0.0-rc.2",
+    "@vue/compiler-sfc": "3.0.0-rc.2",
+    "eslint": "7.5.0",
+    "eslint-plugin-vue": "7.0.0-beta.0",
+    "rollup-plugin-terser": "5.3.0",
+    "tailwindcss": "1.5.1",
+    "vite": "1.0.0-rc.1",
     "components": "file:src/components",
-    "eslint": "^7.5.0",
-    "eslint-plugin-vue": "^7.0.0-beta.0",
     "hooks": "file:src/hooks",
-    "lib": "file:src/lib",
-    "rollup-plugin-terser": "^5.3.0",
-    "rollup-plugin-userscript-metablock": "^0.2.5",
-    "tailwindcss": "^1.5.1",
-    "vite": "^1.0.0-rc.1"
+    "lib": "file:src/lib"
   }
 }
