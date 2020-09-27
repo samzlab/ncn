@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+      "module": "ES2020",
+      "sourceMap": true,
+      "removeComments": true,
+      "declaration": true,
+      "outDir": "dist"
+  }
+}
