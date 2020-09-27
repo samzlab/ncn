@@ -68,9 +68,22 @@ function addTorrents(torrents) {
 
 	indexByImdb(results, imdbIndex, (index) => index.fresh = true);
 
-	results.forEach( ({ id }) => idIndex.add(id) );
+	// allTorrents.push(...results);
+	let newTorrents = [];
+	torrents.forEach(torrent => {
+		if (idIndex.has(torrent.id)) {
+			// const idx = allTorrents.find(torrent);
+			// Object.assign(allTorrents[idx], torrent);
+			// console.log();
+			Object.assign(findById(allTorrents, torrent.id), torrent);
+		} else {
+			newTorrents.push(torrent);
+		}
+	});
 
-	allTorrents.push(...results);
+	allTorrents.push(...newTorrents);
+
+	results.forEach( ({ id }) => idIndex.add(id) );
 
 	return results;
 }
