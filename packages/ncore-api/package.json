@@ -5,24 +5,23 @@
   "module": "dist/index.js",
   "type": "module",
   "scripts": {
+    "build": "rollup -c",
     "test": "rollup -c && jest"
   },
   "issues": "https://github.com/samzlab/ncn/issues",
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
-    "@koffeine/eslint-config": "16.0.1",
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/jest": "^26.0.14",
     "babel-jest": "^26.3.0",
-    "eslint": "7.9.0",
+    "eslint": "7.10.0",
     "jest": "^26.4.2",
     "rollup": "^2.28.2",
     "tslib": "^2.0.1",
     "typescript": "^4.0.3"
   },
-  "dependencies": {},
   "jest": {
-      "verbose": true
+    "verbose": true
   }
 }

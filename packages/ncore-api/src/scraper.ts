@@ -24,7 +24,7 @@ export type torrentInfo = {
 };
 
 export type scrapeResult = {
-	pages: number,
+	pageCount: number,
 	torrents: torrentInfo[]
 };
 
@@ -128,6 +128,24 @@ export function parseTorrentTypeFromURL(url: string): torrentType {
 
 export function getTextContent(el: HTMLElement): string {
 	return el.textContent;
+}
+
+export function getPageCountFromLinks(links: NodeListOf<HTMLAnchorElement>): number {
+	if (links.length === 0) {
+		return 0;
+	}
+
+	const $lastPageLink = links[links.length - 1];
+	let pages = 0;
+
+	if ($lastPageLink) {
+		pages = parseInt($lastPageLink.getAttribute('href').match(/oldal=(\d+)/)[1]);
+		if ($lastPageLink.textContent !== 'Utolsó') { // ha az utso oldalon vagyunk, azaz az utolso link nem oda mutat
+			pages++;
+		}
+	}
+
+	return pages;
 }
 
 export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
@@ -237,16 +255,17 @@ export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
 
 	// TODO: pages
 
-	let pages = 0;
+	const $pageLinks: NodeListOf<HTMLAnchorElement> = body.querySelectorAll('#pager_top a[href^="/torrents.php"]');
+	const pageCount = getPageCountFromLinks($pageLinks);
 
-	// const $lastPageLink = [...body.querySelectorAll('#pager_top a[href^="/torrents.php"]')].pop();
+	return {
+		pageCount,
+		torrents
+	};
+}
 
-	// if ($lastPageLink) {
-	// 	pages = $lastPageLink.getAttribute('href').match(/oldal=(\d+)/)[1];
-	// 	if ($lastPageLink.textContent !== 'Utolsó') { // ha az utso oldalon vagyunk, azaz az utolso link nem oda mutat
-	// 		pages++;
-	// 	}
-	// }
-
-	return { pages, torrents };
+export function parseHTML(html){
+	var doc = document.implementation.createHTMLDocument("temp");
+	doc.documentElement.innerHTML = html;
+	return doc.body;
 }
