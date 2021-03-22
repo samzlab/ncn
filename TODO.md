@@ -57,3 +57,22 @@ A jelenlegi verzió gyakorlatilag egy PoC (Proof of Concept), de működésileg 
 
 ## Funkciók
 
+### Szűrők
+
+* Nyelv: Magyar, Angol
+* Felbontás: SD, Kis HD (720p), Full HD (1080p), Ultra HD (2160p)
+* Év
+* Címke
+* 
+
+## Extrák
+
+* [ ] aktuális seed alapján helyezés számítás
+
+* [ ] **ncn-synology**: Synology DiskStation / Download Station integráció
+
+  * [ ] SSO?
+  * [ ] https://github.com/kwent/syno
+
+  > **TODO**
+

@@ -29,6 +29,7 @@ importers:
     devDependencies:
       '@babel/core': 7.13.8
       '@babel/preset-env': 7.13.9_@babel+core@7.13.8
+      '@babel/preset-typescript': 7.13.0_@babel+core@7.13.8
       '@rollup/plugin-typescript': 6.1.0_611c8b2ed1e492df47cb58b5c35b4947
       '@types/jest': 26.0.20
       babel-jest: 26.6.3_@babel+core@7.13.8
@@ -40,6 +41,7 @@ importers:
     specifiers:
       '@babel/core': ^7.11.6
       '@babel/preset-env': ^7.11.5
+      '@babel/preset-typescript': ^7.10.4
       '@rollup/plugin-typescript': ^6.0.0
       '@types/jest': ^26.0.14
       babel-jest: ^26.3.0
@@ -554,6 +556,15 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-A81F9pDwyS7yM//KwbCSDqy3Uj4NMIurtplxphWxoYtNPov7cJsDkAFNNyVlIZ3jwGycVsurZ+LtOA8gZ376iQ==
+  /@babel/plugin-syntax-typescript/7.12.13_@babel+core@7.13.8:
+    dependencies:
+      '@babel/core': 7.13.8
+      '@babel/helper-plugin-utils': 7.13.0
+    dev: true
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-cHP3u1JiUiG2LFDKbXnwVad81GvfyIOmCD6HIEId6ojrY0Drfy2q1jw7BwN7dE84+kTnBjLkXoL3IEy/3JPu2w==
   /@babel/plugin-transform-arrow-functions/7.13.0_@babel+core@7.13.8:
     dependencies:
       '@babel/core': 7.13.8
@@ -847,6 +858,17 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-eKv/LmUJpMnu4npgfvs3LiHhJua5fo/CysENxa45YCQXZwKnGCQKAg87bvoqSW1fFT+HA32l03Qxsm8ouTY3ZQ==
+  /@babel/plugin-transform-typescript/7.13.0_@babel+core@7.13.8:
+    dependencies:
+      '@babel/core': 7.13.8
+      '@babel/helper-create-class-features-plugin': 7.13.8_@babel+core@7.13.8
+      '@babel/helper-plugin-utils': 7.13.0
+      '@babel/plugin-syntax-typescript': 7.12.13_@babel+core@7.13.8
+    dev: true
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-elQEwluzaU8R8dbVuW2Q2Y8Nznf7hnjM7+DSCd14Lo5fF63C9qNLbwZYbmZrtV9/ySpSUpkRpQXvJb6xyu4hCQ==
   /@babel/plugin-transform-unicode-escapes/7.12.13_@babel+core@7.13.8:
     dependencies:
       '@babel/core': 7.13.8
@@ -955,6 +977,17 @@ packages:
       '@babel/core': ^7.0.0-0
     resolution:
       integrity: sha512-J36NhwnfdzpmH41M1DrnkkgAqhZaqr/NBdPfQ677mLzlaXo+oDiv1deyCDtgAhz8p328otdob0Du7+xgHGZbKg==
+  /@babel/preset-typescript/7.13.0_@babel+core@7.13.8:
+    dependencies:
+      '@babel/core': 7.13.8
+      '@babel/helper-plugin-utils': 7.13.0
+      '@babel/helper-validator-option': 7.12.17
+      '@babel/plugin-transform-typescript': 7.13.0_@babel+core@7.13.8
+    dev: true
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    resolution:
+      integrity: sha512-LXJwxrHy0N3f6gIJlYbLta1D9BDtHpQeqwzM0LIfjDlr6UE/D5Mc7W4iDiQzaE+ks0sTjT26ArcHWnJVt0QiHw==
   /@babel/runtime/7.13.9:
     dependencies:
       regenerator-runtime: 0.13.7

@@ -1,4 +1,4 @@
-const { getSeriesInfo, getSource, getResolution, getValidYear, getReleaser } = require('../dist/parser.js');
+import { getSeriesInfo, getSource, getResolution, getValidYear, getReleaser } from '../src/parser.ts'
 
 describe('getResolution', () => {
 

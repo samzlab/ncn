@@ -133,15 +133,16 @@ export function getSeriesInfo(torrentName: string): seriesInfo | null {
 		};
 	}
 
+	// @unused since the multi episode parser covers this case
 	// title.S01E08.720p...
-	const seasonSingleEpisode = torrentName.match(/[^\w](S(\d+)E(\d+))/ui);
-	if (seasonSingleEpisode) {
-		return {
-			match: seasonSingleEpisode[1],
-			seasons: [parseInt(seasonSingleEpisode[2])],
-			episodes: [parseInt(seasonSingleEpisode[3])]
-		}
-	}
+	// const seasonSingleEpisode = torrentName.match(/[^\w](S(\d+)E(\d+))/ui);
+	// if (seasonSingleEpisode) {
+	// 	return {
+	// 		match: seasonSingleEpisode[1],
+	// 		seasons: [parseInt(seasonSingleEpisode[2])],
+	// 		episodes: [parseInt(seasonSingleEpisode[3])]
+	// 	}
+	// }
 
 
 	// title.S01.720p...

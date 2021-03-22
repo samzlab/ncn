@@ -104,27 +104,29 @@ export function parseTorrentIdFromURL(url: string): number {
 		throw Error(`Can not parse torrent id from url: ${url}`);
 	}
 
-	return parseInt(id[0]);
+	return parseInt(id[1]);
 }
 
 export function parseCoverLinkFromMouseOverScript(script: string): string | null {
 	const url = script.match(/mutat\('([^']*)/u);
 
-	if (!url) {
-		console.log(`Can not parse cover image from script: ${script}`);
-	}
+	// if (!url) {
+	// 	console.log(`Can not parse cover image from script: ${script}`);
+	// }
 
 	return url ? url[1] : null;
 }
 
 export function parseImdbRating(text: string): number {
 	// "[7.5]" => 7.5
-	return parseFloat(text.match(/\d\.\d/).toString());
+	const match = text.match(/\d\.\d/);
+	return match ? parseFloat(match.toString()) : null;
 }
 
-export function parseTorrentTypeFromURL(url: string): torrentType {
-	return url.match(/ser/) ? 'series' : 'movie';
-}
+/* unused */
+// export function parseTorrentTypeFromURL(url: string): torrentType {
+// 	return url.match(/ser/) ? 'series' : 'movie';
+// }
 
 export function getTextContent(el: HTMLElement): string {
 	return el.textContent;
@@ -139,13 +141,108 @@ export function getPageCountFromLinks(links: NodeListOf<HTMLAnchorElement>): num
 	let pages = 0;
 
 	if ($lastPageLink) {
-		pages = parseInt($lastPageLink.getAttribute('href').match(/oldal=(\d+)/)[1]);
+		// pages = parseInt($lastPageLink.getAttribute('href').match(/oldal=(\d+)/)[1]);
+		pages = getPage($lastPageLink);
 		if ($lastPageLink.textContent !== 'Utolsó') { // ha az utso oldalon vagyunk, azaz az utolso link nem oda mutat
 			pages++;
 		}
 	}
 
 	return pages;
+}
+
+export function getTorrentInfoFromRow(row: HTMLDivElement): torrentInfo {
+	const torrent: torrentInfo = {
+		type: 		'movie',
+		category:   'dvd',
+		series:		null,
+		info:		null,
+		name: 		'',
+		title:	  	'',
+		id:       	0,
+		uploaded: 	null,
+		size:     	'',
+		seeds:    	0,
+		cover:   	'',
+		imdb:    	'',
+		rating:  	0
+	};
+
+	// torrent linkje	div.torrent_txt > a
+	const linkEl 		= getTorrentLink(row);
+
+	// torrent neve		[title]
+	torrent.name 		= readAttr(linkEl, 'title');
+	torrent.id 			= parseTorrentIdFromURL(readAttr(linkEl, 'href'));
+
+	// torrent tipusa
+	typeLink: {
+		const href 			= readAttr(getTorrentCategoryLink(row), 'href');
+		const category      = parseTorrentCategoryFromUrl(href);
+		torrent.category	= category;
+
+		const isSeries      = seriesCategories.includes(category);
+		torrent.type        = isSeries ? 'series' : 'movie';
+
+		if (isSeries) {
+			torrent.series = getSeriesInfo(torrent.name);
+		}
+	}
+
+	// feltoltes datuma	.box_feltoltve2
+	torrent.uploaded 	= Math.floor(Date.parse(getTorrentUpload(row)) / 1000);
+	// meret			.box_meret2
+	torrent.size        = getTextContent(getTorrentSize(row));
+	// seederek			.box_s2 a[href$="#peers"]
+	torrent.seeds       = parseInt(getTextContent(getTorrentSeeds(row)));
+
+	// boritokép		div.infobar > img
+	const coverEl 		= getInfobarImage(row);
+	if (coverEl) {
+		const mouseover 	= readAttr(coverEl, 'onmouseover');
+		torrent.cover   	= parseCoverLinkFromMouseOverScript(mouseover);
+	}
+
+	// extra infok		div.siterank
+	const siterankEl	= getSiterank(row);
+
+	if (siterankEl) {
+		title: { // 			> span[title]
+			const span  		= getSpanFromSiterank(siterankEl);
+			torrent.title 		= readAttr(span, 'title');
+		}
+
+		// imdb link 		> a.infolink
+		const imdbLinkEl	= getInfoLinkFromSiterank(siterankEl);
+
+		if (imdbLinkEl) {
+			// imdb id:			[href]
+			const href  		= readAttr(imdbLinkEl, 'href');
+			torrent.imdb 		= parseImdbIdFromURL(href);
+
+			// imdb rating:		textContent
+			torrent.rating		= parseImdbRating(getTextContent(imdbLinkEl));
+		}
+	}
+
+	torrent.info = parseTorrentName(torrent.name);
+
+	// fix missing title
+	if (torrent.title === '') {
+		torrent.title = getTorrentTitleFromName(torrent);
+	}
+
+	return torrent;
+}
+
+export function getTorrentTitleFromName(torrent: torrentInfo): string {
+	const beforeYear = torrent.name.match(new RegExp(`^(.*)\.${torrent.info.year}\.`));
+
+	if (beforeYear) {
+		return beforeYear[1].replace(/\./g, ' ');
+	}
+
+	return 'n/a';
 }
 
 export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
@@ -158,102 +255,14 @@ export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
 		const row: HTMLDivElement = rows[i];
 
 		try {
-			const torrent: torrentInfo = {
-				type: 		'movie',
-				category:   'dvd',
-				series:		null,
-				info:		null,
-				name: 		'',
-				title:	  	'',
-				id:       	0,
-				uploaded: 	null,
-				size:     	'',
-				seeds:    	0,
-				cover:   	'',
-				imdb:    	'',
-				rating:  	0
-			};
-
-			// torrent linkje	div.torrent_txt > a
-			const linkEl 		= getTorrentLink(row);
-
-			// torrent neve		[title]
-			torrent.name 		= readAttr(linkEl, 'title');
-			torrent.id 			= parseTorrentIdFromURL(readAttr(linkEl, 'href'));
-
-			// torrent tipusa
-			typeLink: {
-				const href 			= readAttr(getTorrentCategoryLink(row), 'href');
-				const category      = parseTorrentCategoryFromUrl(href);
-				torrent.category	= category;
-
-				const isSeries      = seriesCategories.includes(category);
-				torrent.type        = isSeries ? 'series' : 'movie';
-
-				if (isSeries) {
-					torrent.series = getSeriesInfo(torrent.name);
-				}
-			}
-
-			// feltoltes datuma	.box_feltoltve2
-			torrent.uploaded 	= Math.floor(Date.parse(getTorrentUpload(row)) / 1000);
-			// meret			.box_meret2
-			torrent.size        = getTextContent(getTorrentSize(row));
-			// seederek			.box_s2 a[href$="#peers"]
-			torrent.seeds       = parseInt(getTextContent(getTorrentSeeds(row)));
-
-			// boritokép		div.infobar > img
-			const coverEl 		= getInfobarImage(row);
-			if (coverEl) {
-				const mouseover 	= readAttr(coverEl, 'onmouseover');
-				torrent.cover   	= parseCoverLinkFromMouseOverScript(mouseover);
-			}
-
-			// extra infok		div.siterank
-			const siterankEl	= getSiterank(row);
-
-			if (siterankEl) {
-				title: { // 			> span[title]
-					const span  		= getSpanFromSiterank(siterankEl);
-					torrent.title 		= readAttr(span, 'title');
-				}
-
-				// imdb link 		> a.infolink
-				const imdbLinkEl	= getInfoLinkFromSiterank(siterankEl);
-
-				if (imdbLinkEl) {
-					// imdb id:			[href]
-					const href  		= readAttr(imdbLinkEl, 'href');
-					torrent.imdb 		= parseImdbIdFromURL(href);
-
-					// imdb rating:		textContent
-					torrent.rating		= parseImdbRating(getTextContent(imdbLinkEl));
-				}
-			}
-
-			torrent.info = parseTorrentName(torrent.name);
-
-			// if (!result.title) {
-			// 	// try to figure out from the torrent name
-			// 	const beforeYear = result.name.match(new RegExp(`^(.*)\.${result.year}\.`));
-
-			// 	if (beforeYear) {
-			// 		result.title = beforeYear[1].replace(/\./g, ' ');
-			// 	}
-			// }
-
-			// if( result.type == 'SD' ) {
-			// 	result.resolution = 'SD';
-			// }
+			const torrent = getTorrentInfoFromRow(row);
 
 			torrents.push(torrent);
 		} catch(e) {
-			console.log('this row is too funky :/', row);
-			console.error(e);
+			// console.log('this row is too funky :/', row.outerHTML);
+			// console.error(e);
 		}
 	}
-
-	// TODO: pages
 
 	const $pageLinks: NodeListOf<HTMLAnchorElement> = body.querySelectorAll('#pager_top a[href^="/torrents.php"]');
 	const pageCount = getPageCountFromLinks($pageLinks);
@@ -264,8 +273,12 @@ export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
 	};
 }
 
-export function parseHTML(html){
+export function getPassKey(body: HTMLBodyElement): string {
+	return [...body.querySelectorAll('#profil_right li')].find(li => li.textContent.match(/Passkey/)).children[0].textContent;
+}
+
+export function parseHTML(html): HTMLBodyElement {
 	var doc = document.implementation.createHTMLDocument("temp");
 	doc.documentElement.innerHTML = html;
-	return doc.body;
+	return doc.body as HTMLBodyElement;
 }
