@@ -5,6 +5,7 @@
       "sourceMap": true,
       "removeComments": true,
       "declaration": true,
-      "outDir": "dist"
+      "outDir": "dist",
+      "moduleResolution": "node"
   }
 }
