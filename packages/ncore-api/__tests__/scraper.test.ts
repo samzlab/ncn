@@ -1,5 +1,5 @@
-import { parseHTML, getTorrentsFromBody, parseTorrentIdFromURL, getTorrentInfoFromRow, parseTorrentCategoryFromUrl, getPassKey } from '../src/scraper';
-import * as mocks from '../src/mock';
+import { parseHTML, getTorrentsFromBody, parseTorrentIdFromURL, getTorrentInfoFromRow, parseTorrentCategoryFromUrl, findPassKey } from '../src/scraper';
+import * as mocks from '../mock';
 
 function fromHTML(html: string): HTMLElement {
 	const div = document.createElement('div');
@@ -112,7 +112,7 @@ describe('Other utils', () => {
 	const profileBody = fromHTML(mocks.profile);
 
 	test('Should find passkey on profile page', () => {
-		expect(getPassKey(profileBody as HTMLBodyElement)).toBe('qweasdasd');
+		expect(findPassKey(profileBody as HTMLBodyElement)).toBe('qweasdasd');
 	});
 
 	const row = fromHTML(mocks.malformedRow);

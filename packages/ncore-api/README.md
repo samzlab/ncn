@@ -1,5 +1,7 @@
 # ncore-api
 
+![coverage](./coverage/badge.svg)
+
 ## API
 
 Ez végzi kommunikációt a háttérben az ncore szerverrel.

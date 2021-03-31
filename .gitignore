@@ -3,5 +3,6 @@ node_modules
 dist
 *.local
 *.code-workspace
-public/mock/*
+lcov-report/*
 package-lock.json
+**/coverage/lcov-report/**

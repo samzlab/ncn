@@ -273,7 +273,7 @@ export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
 	};
 }
 
-export function getPassKey(body: HTMLBodyElement): string {
+export function findPassKey(body: HTMLBodyElement): string {
 	return [...body.querySelectorAll('#profil_right li')].find(li => li.textContent.match(/Passkey/)).children[0].textContent;
 }
 

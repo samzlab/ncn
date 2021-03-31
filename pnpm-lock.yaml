@@ -36,6 +36,7 @@ importers:
       eslint: 7.10.0
       jest: 26.6.3
       jest-fetch-mock: 3.0.3
+      make-coverage-badge: 1.2.0
       rollup: 2.40.0
       tslib: 2.1.0
       typescript: 4.2.2
@@ -49,6 +50,7 @@ importers:
       eslint: 7.10.0
       jest: ^26.4.2
       jest-fetch-mock: ^3.0.3
+      make-coverage-badge: ^1.2.0
       rollup: ^2.28.2
       tslib: ^2.0.1
       typescript: ^4.0.3
@@ -4794,6 +4796,16 @@ packages:
     dev: true
     resolution:
       integrity: sha512-4CrMT5DOHTDk4HYDlzmwu4FVCcIYI8gauveasrdCu2IKIFOJ3f0v/8MDGJCDL9oD2ppz/Av1b0Nj345H9M+XIA==
+  /make-coverage-badge/1.2.0:
+    dependencies:
+      mri: 1.1.4
+    dev: true
+    engines:
+      node: '>=6.11'
+      npm: '>=5.3'
+    hasBin: true
+    resolution:
+      integrity: sha512-nA1eQZJ9vcY2UoQLVIdzqyRoNtAZHWlXJfrHkaMB/pQgTYBPmbImkykfxWeAtUQuLJXzb6eAhbR7nEgrt+S7FA==
   /make-dir/3.1.0:
     dependencies:
       semver: 6.3.0
@@ -4919,6 +4931,12 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
+  /mri/1.1.4:
+    dev: true
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-6y7IjGPm8AzlvoUrwAaw1tLnUBudaS3752vcd8JtrpGGQn+rXIe63LFVHm/YMwtqAuh+LJPCFdlLYPWM1nYn6w==
   /ms/2.0.0:
     dev: true
     resolution:

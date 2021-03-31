@@ -1,4 +1,4 @@
-import { getPassKey, movieCategory, parseHTML, seriesCategory } from "./scraper";
+import { findPassKey, getTorrentsFromBody, movieCategory, parseHTML, scrapeResult, seriesCategory } from "./scraper";
 
 // innen toltjuk be a profilt (passKey kiolvasasahoz)
 export const PROFILE_URL = 'profile.php?action=other';
@@ -33,25 +33,21 @@ export function objectToUri(object: Object = {}) {
 	return entries.join('&');
 }
 
-export function uriToObject(uri: string = ''): Object {
-	const result = {};
-
-	if (uri.length > 0) {
-		new URLSearchParams(uri).forEach((val, key) => result[key] = val);
-	}
-
-	return result;
+export async function getPassKey(): Promise<string> {
+	const body = parseHTML(await fetchHTML(PROFILE_URL));
+	return findPassKey(body);
 }
 
-export async function fetchPassKey(): Promise<string> {
-	const body = parseHTML(await fetchHTML(PROFILE_URL));
-	try {
-		return getPassKey(body);
-	} catch (err) {
-		console.error('can not get passkey :(');
-		console.error(err);
-		return null;
+export async function getTorrents(search: searchByTitleOptions | searchByImdbOptions): Promise<scrapeResult> {
+	let html: string;
+
+	if ('imdb' in search) {
+		html = await fetchByIMDB(search);
+	} else {
+		html = await fetchByTitle(search);
 	}
+
+	return getTorrentsFromBody(parseHTML(html));
 }
 
 export type torrentSearchQuery = {
@@ -68,13 +64,20 @@ export async function fetchTorrents(query: torrentSearchQuery): Promise<string> 
 }
 
 export type torrentSearchOptions = {
-	title?: string,
 	types?: (movieCategory | seriesCategory)[],
 	tags?: string[],
 	page?: number
 }
 
-export async function fetchByTitle({ title, types, tags, page }: torrentSearchOptions) {
+export type searchByTitleOptions = torrentSearchOptions & {
+	title: string
+};
+
+export type searchByImdbOptions = torrentSearchOptions & {
+	imdb: string
+};
+
+export async function fetchByTitle({ title, types, tags, page }: searchByTitleOptions) {
 	return fetchTorrents({
 		'kivalasztott_tipus': types,
 		'mire': title,
@@ -85,11 +88,12 @@ export async function fetchByTitle({ title, types, tags, page }: torrentSearchOp
 	});
 }
 
-export async function fetchByIMDB(imdbId, types, oldal) {
+export async function fetchByIMDB({ imdb, types, page }: searchByImdbOptions) {
 	return fetchTorrents({
 		'kivalasztott_tipus': types,
-		'mire': imdbId,
+		'mire': imdb,
 		'miben': 'imdb',
 		'tipus': 'kivalasztottak_kozott',
-		oldal
+		oldal: page
 	});
+}
