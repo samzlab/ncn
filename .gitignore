@@ -3,6 +3,6 @@ node_modules
 dist
 *.local
 *.code-workspace
-lcov-report/*
 package-lock.json
-**/coverage/lcov-report/**
+coverage
+!coverage/badge.svg
