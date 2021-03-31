@@ -3,4 +3,5 @@ node_modules
 dist
 *.local
 *.code-workspace
+public/mock/*
 package-lock.json
