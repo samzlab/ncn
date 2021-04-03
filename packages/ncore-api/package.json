@@ -2,10 +2,10 @@
   "name": "ncore-api",
   "version": "0.1.0",
   "private": true,
-  "module": "dist/index.js",
+  "module": "src/index.ts",
+  "typings": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
     "test": "jest --coverage",
     "build:coverage": "make-coverage-badge"
   },

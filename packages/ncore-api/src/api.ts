@@ -1,4 +1,4 @@
-import { findPassKey, getTorrentsFromBody, movieCategory, parseHTML, scrapeResult, seriesCategory } from "./scraper";
+import { Category, findPassKey, getTorrentsFromBody, parseHTML, scrapeResult } from "./scraper";
 
 // innen toltjuk be a profilt (passKey kiolvasasahoz)
 export const PROFILE_URL = 'profile.php?action=other';
@@ -38,7 +38,56 @@ export async function getPassKey(): Promise<string> {
 	return findPassKey(body);
 }
 
-export async function getTorrents(search: searchByTitleOptions | searchByImdbOptions): Promise<scrapeResult> {
+export type TorrentSearchQuery = {
+	kivalasztott_tipus?: Category[],
+	mire?: string,
+	miben?: 'name' | 'imdb',
+	tags?: string[],
+	tipus?: 'kivalasztottak_kozott', // no other supported yet
+	oldal?: number
+};
+
+export async function fetchTorrents(query: TorrentSearchQuery): Promise<string> {
+	return fetchHTML(`${TORRENTS_URL}${objectToUri(query)}`);
+}
+
+export type TorrentSearchOptions = {
+	categories?: Category[],
+	tags?: string[],
+	page?: number
+}
+
+export type SearchByTitleOptions = TorrentSearchOptions & {
+	title: string
+};
+
+export type SearchByImdbOptions = TorrentSearchOptions & {
+	imdb: string
+};
+
+export async function fetchByTitle({ title, categories, tags, page }: SearchByTitleOptions) {
+	return fetchTorrents({
+		'kivalasztott_tipus': categories,
+		'mire': title,
+		'miben': 'name',
+		'tipus': 'kivalasztottak_kozott',
+		'tags': tags,
+		oldal: page
+	});
+}
+
+export async function fetchByIMDB({ imdb, categories, page }: SearchByImdbOptions) {
+	return fetchTorrents({
+		'kivalasztott_tipus': categories,
+		'mire': imdb,
+		'miben': 'imdb',
+		'tipus': 'kivalasztottak_kozott',
+		oldal: page
+	});
+}
+
+
+export async function getTorrents(search: SearchByTitleOptions | SearchByImdbOptions): Promise<scrapeResult> {
 	let html: string;
 
 	if ('imdb' in search) {
@@ -48,52 +97,4 @@ export async function getTorrents(search: searchByTitleOptions | searchByImdbOpt
 	}
 
 	return getTorrentsFromBody(parseHTML(html));
-}
-
-export type torrentSearchQuery = {
-	kivalasztott_tipus?: (movieCategory | seriesCategory)[],
-	mire?: string,
-	miben?: 'name' | 'imdb',
-	tags?: string[],
-	tipus?: 'kivalasztottak_kozott', // no other supported yet
-	oldal?: number
-};
-
-export async function fetchTorrents(query: torrentSearchQuery): Promise<string> {
-	return fetchHTML(`${TORRENTS_URL}${objectToUri(query)}`);
-}
-
-export type torrentSearchOptions = {
-	types?: (movieCategory | seriesCategory)[],
-	tags?: string[],
-	page?: number
-}
-
-export type searchByTitleOptions = torrentSearchOptions & {
-	title: string
-};
-
-export type searchByImdbOptions = torrentSearchOptions & {
-	imdb: string
-};
-
-export async function fetchByTitle({ title, types, tags, page }: searchByTitleOptions) {
-	return fetchTorrents({
-		'kivalasztott_tipus': types,
-		'mire': title,
-		'miben': 'name',
-		'tipus': 'kivalasztottak_kozott',
-		'tags': tags,
-		oldal: page
-	});
-}
-
-export async function fetchByIMDB({ imdb, types, page }: searchByImdbOptions) {
-	return fetchTorrents({
-		'kivalasztott_tipus': types,
-		'mire': imdb,
-		'miben': 'imdb',
-		'tipus': 'kivalasztottak_kozott',
-		oldal: page
-	});
 }

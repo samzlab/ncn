@@ -3,30 +3,17 @@ import typescript from '@rollup/plugin-typescript';
 import { peerDependencies } from './package.json';
 const external = peerDependencies ? Object.keys(peerDependencies) : [];
 
-// export default {
-// 	input: 'src/parser.ts',
-
-// 	output: {
-// 		sourcemap: true,
-// 		dir: 'dist',
-// 		format: 'esm',
-// 	},
-
-// 	plugins: [ typescript() ]
-
-// };
-
-
 function getOptions(format, suffix = '', plugins = []) {
 	/** @type {import('rollup').RollupOptions} */
 	const options = {
-		input: 'src/scraper.ts',
+		input: 'src/index.ts',
 		external,
 		output: {
 			preserveModules: true,
 			format,
 			dir: 'dist',
-			entryFileNames: `[name]${suffix}-[format].js`
+			//entryFileNames: `[name]${suffix}-[format].js`
+			entryFileNames: `[name]${suffix}.js`
 		},
 		plugins: [
 			// nodeResolve(),
@@ -41,6 +28,6 @@ function getOptions(format, suffix = '', plugins = []) {
 }
 
 export default [
-	getOptions('cjs'),
+	// getOptions('cjs'),
 	getOptions('esm')
 ];

@@ -1,17 +1,20 @@
-import { getSeriesInfo, parsedInfo, parseTorrentName, seriesInfo } from "./parser"
+import { getSeriesInfo, ParsedInfo, parseTorrentName, SeriesInfo } from "./parser"
 
-export type torrentType = 'series' | 'movie';
-export type movieCategory = 'hd' | 'hd_hun' | 'xvid' | 'xvid_hun' | 'dvd' | 'dvd_hun' | 'dvd9' | 'dvd9_hun';
-export type seriesCategory = 'hdser' | 'hdser_hun' | 'xvidser' | 'xvidser_hun' | 'dvdser' | 'dvdser_hun';
+export type TorrentType = 'series' | 'movie';
 
-const movieCategories  = [ 'hd', 'hd_hun', 'xvid', 'xvid_hun', 'dvd', 'dvd_hun', 'dvd9', 'dvd9_hun' ];
-const seriesCategories = [ 'hdser', 'hdser_hun', 'xvidser', 'xvidser_hun', 'dvdser', 'dvdser_hun' ];
+export const movieCategories  = [ 'hd', 'hd_hun', 'xvid', 'xvid_hun', 'dvd', 'dvd_hun', 'dvd9', 'dvd9_hun' ] as const;
+export const seriesCategories = [ 'hdser', 'hdser_hun', 'xvidser', 'xvidser_hun', 'dvdser', 'dvdser_hun' ] as const;
 
-export type torrentInfo = {
-	type:     torrentType,
-	category: movieCategory | seriesCategory | string,
-	series?:  seriesInfo,
-	info:     parsedInfo,
+export type MovieCategory = typeof movieCategories[number];
+export type SeriesCategory = typeof seriesCategories[number];
+
+export type Category = SeriesCategory | MovieCategory;
+
+export type TorrentInfo = {
+	type:     TorrentType,
+	category: Category,
+	series?:  SeriesInfo,
+	info:     ParsedInfo,
 	name:	  string,
 	title?:	  string,
 	id:       number,
@@ -25,7 +28,7 @@ export type torrentInfo = {
 
 export type scrapeResult = {
 	pageCount: number,
-	torrents: torrentInfo[]
+	torrents: TorrentInfo[]
 };
 
 export function getRowsFromBody(body: HTMLBodyElement): NodeListOf<HTMLDivElement> {
@@ -87,14 +90,24 @@ export function parseImdbIdFromURL(url: string): string | null {
 	return imdbID ? imdbID.toString() : null;
 }
 
-export function parseTorrentCategoryFromUrl(url: string): string {
+export function parseTorrentCategoryFromUrl(url: string): Category {
 	const match = url.match(/tipus=([\w_]+)/);
 
 	if (!match) {
 		throw Error(`Can not find "tipus" parameter in url: ${url}`);
 	}
 
-	return match[1];
+	const category = match[1];
+
+	if (movieCategories.includes(category as MovieCategory)) {
+		return category as MovieCategory;
+	}
+
+	if (seriesCategories.includes(category as SeriesCategory)) {
+		return category as SeriesCategory;
+	}
+
+	throw Error(`Unknown torrent category: ${category}`);
 }
 
 export function parseTorrentIdFromURL(url: string): number {
@@ -151,8 +164,8 @@ export function getPageCountFromLinks(links: NodeListOf<HTMLAnchorElement>): num
 	return pages;
 }
 
-export function getTorrentInfoFromRow(row: HTMLDivElement): torrentInfo {
-	const torrent: torrentInfo = {
+export function getTorrentInfoFromRow(row: HTMLDivElement): TorrentInfo {
+	const torrent: TorrentInfo = {
 		type: 		'movie',
 		category:   'dvd',
 		series:		null,
@@ -178,10 +191,10 @@ export function getTorrentInfoFromRow(row: HTMLDivElement): torrentInfo {
 	// torrent tipusa
 	typeLink: {
 		const href 			= readAttr(getTorrentCategoryLink(row), 'href');
-		const category      = parseTorrentCategoryFromUrl(href);
-		torrent.category	= category;
+		const category      = parseTorrentCategoryFromUrl(href) as string; // bit of TS cheat here...
+		torrent.category	= category as Category; // and here...
 
-		const isSeries      = seriesCategories.includes(category);
+		const isSeries      = seriesCategories.includes(category as SeriesCategory); // and here...
 		torrent.type        = isSeries ? 'series' : 'movie';
 
 		if (isSeries) {
@@ -235,7 +248,7 @@ export function getTorrentInfoFromRow(row: HTMLDivElement): torrentInfo {
 	return torrent;
 }
 
-export function getTorrentTitleFromName(torrent: torrentInfo): string {
+export function getTorrentTitleFromName(torrent: TorrentInfo): string {
 	const beforeYear = torrent.name.match(new RegExp(`^(.*)\.${torrent.info.year}\.`));
 
 	if (beforeYear) {
@@ -248,7 +261,7 @@ export function getTorrentTitleFromName(torrent: torrentInfo): string {
 export function getTorrentsFromBody(body: HTMLBodyElement): scrapeResult {
 	if( !body ) throw new Error('missing HTML to get torrent details :(');
 
-	const torrents: torrentInfo[] = [];
+	const torrents: TorrentInfo[] = [];
 	const rows = getRowsFromBody(body);
 
 	for( let i = 0, len = rows.length; i < len; i++ ){

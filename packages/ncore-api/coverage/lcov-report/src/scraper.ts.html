@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">99.02% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>97/97</span>
+                <span class='fraction'>101/102</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.67% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>33/36</span>
+                <span class='fraction'>36/40</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">98.98% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>93/93</span>
+                <span class='fraction'>97/98</span>
             </div>
         
             
@@ -341,14 +341,30 @@
 <a name='L282'></a><a href='#L282'>282</a>
 <a name='L283'></a><a href='#L283'>283</a>
 <a name='L284'></a><a href='#L284'>284</a>
-<a name='L285'></a><a href='#L285'>285</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -438,6 +454,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">118x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">118x</span>
+<span class="cline-any cline-yes">113x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -628,15 +654,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { getSeriesInfo, parsedInfo, parseTorrentName, seriesInfo } from "./parser"
 &nbsp;
 export type torrentType = 'series' | 'movie';
-export type movieCategory = 'hd' | 'hd_hun' | 'xvid' | 'xvid_hun' | 'dvd' | 'dvd_hun' | 'dvd9' | 'dvd9_hun';
-export type seriesCategory = 'hdser' | 'hdser_hun' | 'xvidser' | 'xvidser_hun' | 'dvdser' | 'dvdser_hun';
 &nbsp;
-const movieCategories  = [ 'hd', 'hd_hun', 'xvid', 'xvid_hun', 'dvd', 'dvd_hun', 'dvd9', 'dvd9_hun' ];
-const seriesCategories = [ 'hdser', 'hdser_hun', 'xvidser', 'xvidser_hun', 'dvdser', 'dvdser_hun' ];
+export const movieCategories  = [ 'hd', 'hd_hun', 'xvid', 'xvid_hun', 'dvd', 'dvd_hun', 'dvd9', 'dvd9_hun' ] as const;
+export const seriesCategories = [ 'hdser', 'hdser_hun', 'xvidser', 'xvidser_hun', 'dvdser', 'dvdser_hun' ] as const;
+&nbsp;
+export type movieCategory = typeof movieCategories[number];
+export type seriesCategory = typeof seriesCategories[number];
+&nbsp;
+export type Category = seriesCategory | movieCategory;
 &nbsp;
 export type torrentInfo = {
 	type:     torrentType,
-	category: movieCategory | seriesCategory | string,
+	category: Category,
 	series?:  seriesInfo,
 	info:     parsedInfo,
 	name:	  string,
@@ -714,14 +743,24 @@ export function parseImdbIdFromURL(url: string): string | null {
 	return imdbID ? imdbID.toString() : <span class="branch-1 cbranch-no" title="branch not covered" >null;</span>
 }
 &nbsp;
-export function parseTorrentCategoryFromUrl(url: string): string {
+export function parseTorrentCategoryFromUrl(url: string): Category {
 	const match = url.match(/tipus=([\w_]+)/);
 &nbsp;
 	if (!match) {
 		throw Error(`Can not find "tipus" parameter in url: ${url}`);
 	}
 &nbsp;
-	return match[1];
+	const category = match[1];
+&nbsp;
+	if (movieCategories.includes(category as movieCategory)) {
+		return category as movieCategory;
+	}
+&nbsp;
+	<span class="missing-if-branch" title="else path not taken" >E</span>if (seriesCategories.includes(category as seriesCategory)) {
+		return category as seriesCategory;
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	throw Error(`Unknown torrent category: ${category}`);</span>
 }
 &nbsp;
 export function parseTorrentIdFromURL(url: string): number {
@@ -805,10 +844,10 @@ export function getTorrentInfoFromRow(row: HTMLDivElement): torrentInfo {
 	// torrent tipusa
 	typeLink: {
 		const href 			= readAttr(getTorrentCategoryLink(row), 'href');
-		const category      = parseTorrentCategoryFromUrl(href);
-		torrent.category	= category;
+		const category      = parseTorrentCategoryFromUrl(href) as string; // bit of TS cheat here...
+		torrent.category	= category as Category; // and here...
 &nbsp;
-		const isSeries      = seriesCategories.includes(category);
+		const isSeries      = seriesCategories.includes(category as seriesCategory); // and here...
 		torrent.type        = isSeries ? 'series' : 'movie';
 &nbsp;
 		if (isSeries) {
@@ -916,7 +955,7 @@ export function parseHTML(html): HTMLBodyElement {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Wed Mar 31 2021 14:59:34 GMT+0200 (Central European Summer Time)
+                at Thu Apr 01 2021 11:40:17 GMT+0200 (Central European Summer Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

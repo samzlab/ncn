@@ -5,3 +5,4 @@ export { default as mixedTorrentList } from './mixed-list';
 export { default as profile } from './profile';
 export { default as movieRow } from './torrent-row';
 export { default as malformedRow } from './malformed-row';
+export { default as onePage } from './one-page';

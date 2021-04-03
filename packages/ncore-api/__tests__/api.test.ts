@@ -1,7 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
 
 import * as mocks from '../mock';
-import { getPassKey, getTorrents, objectToUri, searchByImdbOptions, searchByTitleOptions } from '../src/api';
+import { getPassKey, getTorrents, objectToUri, SearchByImdbOptions, SearchByTitleOptions } from '../src/api';
 
 fetchMock.enableMocks();
 
@@ -20,11 +20,11 @@ describe('Torrents', () => {
 	test('should fetch hd and dvd movies by title and tags', async () => {
 		fetchMock.mockResponse('');
 
-		const search: searchByTitleOptions = {
+		const search: SearchByTitleOptions = {
 			page: 1,
 			tags: [ 'scifi', 'drama' ],
 			title: 'avatar',
-			types: [ 'hd_hun', 'dvd' ]
+			categories: [ 'hd_hun', 'dvd' ]
 		};
 
 		await getTorrents(search);
@@ -41,7 +41,7 @@ describe('Torrents', () => {
 		// title
 		expect(url.searchParams.get('mire')).toEqual(search.title);
 		// types
-		expect(url.searchParams.getAll('kivalasztott_tipus[]')).toEqual(search.types);
+		expect(url.searchParams.getAll('kivalasztott_tipus[]')).toEqual(search.categories);
 
 	});
 
@@ -49,10 +49,10 @@ describe('Torrents', () => {
 	test('should fetch SD series by imdb', async () => {
 		fetchMock.mockResponse('');
 
-		const search: searchByImdbOptions = {
+		const search: SearchByImdbOptions = {
 			page: 1,
 			imdb: 'tt1234',
-			types: [ 'xvidser_hun' ]
+			categories: [ 'xvidser_hun' ]
 		};
 
 		await getTorrents(search);
@@ -67,7 +67,7 @@ describe('Torrents', () => {
 		// imdb
 		expect(url.searchParams.get('mire')).toEqual(search.imdb);
 		// types
-		expect(url.searchParams.getAll('kivalasztott_tipus[]')).toEqual(search.types);
+		expect(url.searchParams.getAll('kivalasztott_tipus[]')).toEqual(search.categories);
 
 	});
 

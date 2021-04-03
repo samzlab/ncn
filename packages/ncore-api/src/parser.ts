@@ -1,8 +1,9 @@
-export type parsedInfo = {
+export type ParsedInfo = {
 	source?: string,
 	resolution?: string,
 	year?: number,
-	releaser?: string
+	releaser?: string,
+	multiLang: boolean
 };
 
 /**
@@ -11,13 +12,21 @@ export type parsedInfo = {
  * @param torrentName Torrent file neve
  * @param full `true` esetén a teljes tokent visszadja (pl: `"720p"`)
  */
-export function getResolution(torrentName: string, full:boolean = false): string {
+export function getResolution(torrentName: string): string | null {
 	let match = torrentName.toLowerCase().match(/(720|1080|2160)(p|i)/ui);
-	return (match && match.length > 1) ? match[full ? 0 : 1].toLowerCase() : null;
+	return (match && match.length > 1) ? match[1].toLowerCase() : null;
 }
 
+export function getFullResolution(torrentName: string): string | null {
+	let match = torrentName.toLowerCase().match(/(720|1080|2160)(p|i)/ui);
+	return (match && match.length > 1) ? match[0].toLowerCase() : null;
+}
 
-const SOURCES = ['bd', '(ld|bd|dvd|web)rip', 'blu([\-e])?ray', 'bd50', 'dvd9', 'web-?dl'].join('|');
+export function getMultilang(torrentName: string): boolean {
+	return torrentName.match(/[^\w]eng[^\w]/ui) === null;
+}
+
+const SOURCES = ['bd', '(ld|bd|dvd|web)rip', 'blu([\-e])?ray', 'bd50', 'dvd9?', 'web-?dl'].join('|');
 const SOURCE_NORMALIZE = Object.entries({ 'bd': 'bluray', 'blu-ray': 'bluray', 'blueray': 'bluray', 'webdl': 'web-dl' });
 const SOURCES_REGEXP = new RegExp('[^w](' + SOURCES + ')[^w]', 'iu');
 
@@ -76,7 +85,7 @@ export function getReleaser(torrentName: string): string|null {
 }
 
 
-export type seriesInfo = {
+export type SeriesInfo = {
 	match: string,
 	seasons: number[],
 	episodes: number[]
@@ -107,7 +116,7 @@ function createRange(from: number, to: number): number[] {
  *
  * @param torrentName Torren file neve
  */
-export function getSeriesInfo(torrentName: string): seriesInfo | null {
+export function getSeriesInfo(torrentName: string): SeriesInfo | null {
 
 	// title.S01-S05.720p...
 	const multiSeason = torrentName.match(/[^\w](S(\d+)-S(\d+))/ui);
@@ -168,11 +177,12 @@ export function getSeriesInfo(torrentName: string): seriesInfo | null {
 	return null;
 }
 
-export function parseTorrentName(torrentName: string): parsedInfo {
+export function parseTorrentName(torrentName: string): ParsedInfo {
 	return {
 		source: getSource(torrentName),
 		resolution: getResolution(torrentName),
 		year: getValidYear(torrentName),
-		releaser: getReleaser(torrentName)
+		releaser: getReleaser(torrentName),
+		multiLang: getMultilang(torrentName)
 	};
 }
